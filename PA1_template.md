@@ -9,7 +9,8 @@ output: html_document
 
 ###Loading of the data set
 
-```{r init}
+
+```r
 setwd("~/GitHub/RepData_PeerAssessment1")
 unzip("activity.zip")
 data = read.csv("activity.csv")
@@ -17,39 +18,53 @@ data = read.csv("activity.csv")
 
 ###Calculation of the total numbers of steps taken each day
 
-```{r total}
+
+```r
 data.by.day=split(data, data$date)
 total <- sapply(data.by.day, FUN=function(t) sum(t$steps,na.rm=TRUE))
 hist(total, xlab='Total number of steps per day', main=NULL)
+```
+
+![plot of chunk total](figure/total.png) 
+
+```r
 mean.tot = mean(total)
 median.tot = median(total)
 ```
 
-The mean number of steps taken each day is `r mean.tot`, the median number is `r median.tot`
+The mean number of steps taken each day is 9354.2295, the median number is 10395
 
 ###Average number of steps taken at a given time interval
 
-```{r time-series}
+
+```r
 data.by.time=split(data, as.factor(data$interval))
 average <- sapply(data.by.time, FUN=function(t) mean(t$steps, na.rm=TRUE))
 plot(as.integer(names(average)), average, type='l', xlab = "Interval", ylab = "Average number of steps")
+```
+
+![plot of chunk time-series](figure/time-series.png) 
+
+```r
 max.i = as.integer(names(which.max(average)))
 time.max = paste(as.character(max.i%/%100),as.character(max.i%%100), sep=':')
 ```
 
-The 5-minute interval with the largest number of steps starts at `r time.max`
+The 5-minute interval with the largest number of steps starts at 8:35
 
 ###Replacement of missing values
 
-```{r}
+
+```r
 na.tot = sum(is.na(data$steps))
 ```
 
-The total number of missing values is `r na.tot`
+The total number of missing values is 2304
 
 The code below replaces the missing values with the mean number of steps taken at this specific time interval
 
-```{r missing values}
+
+```r
 replace <- (1:length(data$steps))[is.na(data$steps)]
 data <- cbind(data, data$steps)
 names(data)[4] <- "replaced"
@@ -59,16 +74,22 @@ for (int in replace){
 data.by.day=split(data, data$date)
 total <- sapply(data.by.day, FUN=function(t) sum(t$replaced))
 hist(total, xlab='Total number of steps per day', main=NULL)
+```
+
+![plot of chunk missing values](figure/missing values.png) 
+
+```r
 mean.tot2 = as.integer(mean(total))
 median.tot2 = as.integer(median(total))
 ```
 
-After replacing the missing values, the mean number of steps taken each day is `r mean.tot2`, the median number is `r median.tot2`
+After replacing the missing values, the mean number of steps taken each day is 10766, the median number is 10766
 
 ###Comparison of activity on weekends and weekdays
 
 This was done with original instead of replaced values
-```{r }
+
+```r
 #Splitting data between weekends and weekdays
 days <- weekdays(as.POSIXct(as.character(data$date), format='%Y-%m-%d'))
 weekend <- days == "Saturday" | days == "Sunday"
@@ -92,4 +113,6 @@ averages$Average <- as.numeric(as.character(averages$Average))
 library(lattice)
 xyplot(Average ~ Interval | Day, data = averages, type='l', layout=c(1,2), ylab='Number of steps')
 ```
+
+![plot of chunk unnamed-chunk-2](figure/unnamed-chunk-2.png) 
 
